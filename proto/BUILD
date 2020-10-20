@@ -3,11 +3,13 @@
 # Checked-in copy of the bazel proto deps.
 #
 
+load("//build_defs:repackage.bzl", "repackaged_jar")
+
 licenses(["notice"])  # Apache 2.0
 
 java_import(
     name = "proto_deps",
-    jars = ["proto_deps.jar"],
+    jars = [":repackaged_proto_deps_deploy.jar"],
     visibility = ["//visibility:public"],
 )
 
@@ -57,7 +59,7 @@ proto_library(
     deps = [
         ":common_proto",
         ":intellij_ide_info_proto",
-        "//third_party/bazel/src/main/protobuf:build_proto",
+        "@bazel//src/main/protobuf:build_proto",
     ],
 )
 
@@ -75,3 +77,60 @@ java_proto_library(
     name = "intellij_plugin_target_deploy_info_java_proto",
     deps = [":intellij_plugin_target_deploy_info_proto"],
 )
+
+repackaged_jar(
+    name = "repackaged_proto_deps_lib",
+    rules = "g3plugins",
+    deps = [
+        ":fast_build_info_java_proto",
+        ":intellij_ide_info_java_proto",
+        ":intellij_plugin_target_deploy_info_java_proto",
+        ":project_data_java_proto",
+        "@bazel//src/main/java/com/google/devtools/build/lib/buildeventstream/proto:build_event_stream_java_proto",
+        "@bazel//src/main/java/com/google/devtools/build/lib/starlarkdebug/proto:starlark_debugging_java_proto",
+        "@bazel//src/main/protobuf:android_deploy_info_java_proto",
+        "@bazel//src/main/protobuf:build_java_proto",
+        "@bazel//src/main/protobuf:deps_java_proto",
+    ],
+)
+
+java_binary(
+    name = "repackaged_proto_deps",
+    launcher = "//third_party/java/jdk:jdk_launcher",
+    main_class = "None",
+    runtime_deps = [":repackaged_proto_deps_lib"],
+)
+
+# genrule(
+#     name = "repackaged_proto_deps",
+#     srcs = [
+#         ":proto_deps_binary_deploy.jar",
+#         ":jarjar_protobuf_rule.txt",
+#     ],
+#     outs = [":repackaged_proto_deps.jar"],
+#     cmd = """
+#     $(location @bazel_tools//third_party/jarjar:jarjar_bin) \
+#         process \
+#         $(location :jarjar_protobuf_rule.txt) \
+#         $(location :proto_deps_binary_deploy.jar) \
+#         $@
+#     """,
+#     tools = ["@bazel_tools//third_party/jarjar:jarjar_bin"],
+# )
+
+# java_binary(
+#     name = "proto_deps_binary",
+#     launcher = "//third_party/java/jdk:jdk_launcher",
+#     main_class = "None",
+#     runtime_deps = [
+#         ":fast_build_info_java_proto",
+#         ":intellij_ide_info_java_proto",
+#         ":intellij_plugin_target_deploy_info_java_proto",
+#         ":project_data_java_proto",
+#         "@bazel//src/main/java/com/google/devtools/build/lib/buildeventstream/proto:build_event_stream_java_proto",
+#         "@bazel//src/main/java/com/google/devtools/build/lib/starlarkdebug/proto:starlark_debugging_java_proto",
+#         "@bazel//src/main/protobuf:android_deploy_info_java_proto",
+#         "@bazel//src/main/protobuf:build_java_proto",
+#         "@bazel//src/main/protobuf:deps_java_proto",
+#     ],
+# )

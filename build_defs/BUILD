@@ -47,3 +47,20 @@ py_binary(
     srcs = ["zip_plugin_files.py"],
     python_version = "PY3",
 )
+
+java_binary(
+    name = "repackager",
+    srcs = glob(["java/**/*.java"]),
+    main_class = "com.google.idea.repackager.Repackager",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//java/com/google/common/base",
+        "//java/com/google/common/collect",
+        "//java/com/google/common/io",
+        "//third_party/java/args4j",
+        "//third_party/java/eclipse_sisu_plexus",
+        "//third_party/java/maven:maven_lib",
+        "//third_party/java/maven_shade_plugin",
+        "//third_party/java/plexus_classworlds",
+    ],
+)
